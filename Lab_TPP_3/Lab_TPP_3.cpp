@@ -3,12 +3,12 @@
 
 using namespace std;
 
-const int n = 5; // Размер квадратной матрицы
+const int n = 5; //Размер квадратной матрицы
 
-// Функция для последовательного умножения квадратных матриц N*N
-void singleMultiply(float** firstMatrix, float** secondMatrix, float** result, long long q) {
+//Функция для последовательного умножения квадратных матриц N*N
+void singleMultiply(float** firstMatrix, float** secondMatrix, float** result, int q) {
 
-    for (long long b = 0; b < q; b++) {
+    for (int b = 0; b < q; b++) {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 result[i][j] = 0;
@@ -21,7 +21,7 @@ void singleMultiply(float** firstMatrix, float** secondMatrix, float** result, l
     }
 }
 
-
+//Функция для параллельного умножения квадратных матриц N*N, алгоритм 1
 void parallelMultiplyAlg1(float** firstMatrix, float** secondMatrix, float** result, int q) {
 
     for (int b = 0; b < q; b++) {
@@ -38,7 +38,7 @@ void parallelMultiplyAlg1(float** firstMatrix, float** secondMatrix, float** res
     }
 }
 
-
+//Функция для параллельного умножения квадратных матриц N*N, алгоритм 2
 void parallelMultiplyAlg2(float** firstMatrix, float** secondMatrix, float** result, int q) {
 
     for (int b = 0; b < q; b++) {
@@ -54,10 +54,11 @@ void parallelMultiplyAlg2(float** firstMatrix, float** secondMatrix, float** res
     }
 }
 
+//Функция для параллельного умножения квадратных матриц N*N, алгоритм 3
 void parallelMultiplyAlg3(float** firstMatrix, float** secondMatrix, float** result, int q) {
 
     for (int b = 0; b < q; b++) {
-#pragma omp parallel for
+#pragma omp parallel for if (n>13) num_threads(4)
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 result[i][j] = 0;
@@ -68,6 +69,21 @@ void parallelMultiplyAlg3(float** firstMatrix, float** secondMatrix, float** res
         }
     }
 }
+
+//Вычисление евклидовой нормы
+float norm(float** matrix) {
+    
+    float C = 0;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++)
+        {
+            C += matrix[i][j] * matrix[i][j];
+        }
+    }
+
+    return C;
+}
+
 
 int main() {
     setlocale(0, "ru");
@@ -93,7 +109,7 @@ int main() {
     //float result[n][n]{};
 
     int dim = 1000;
-    long long q;
+    int q;
     //
 
     //Заполнение матриц значениями от -0.5 до 0.5
@@ -106,8 +122,6 @@ int main() {
     }
     //
 
-
-
     //Последовательное умножение матриц
     cin >> q;
     double start_time = omp_get_wtime();
@@ -117,26 +131,26 @@ int main() {
     printf("%g %g\n\n", result[0][0], result[n - 1][n - 1]);
     //
 
-    //Распараллеленное умножение матриц Алгоритм 1
-    cin >> q;
-    start_time = omp_get_wtime();
-    parallelMultiplyAlg1(firstMatrix, secondMatrix, result, q);
-    end_time = omp_get_wtime();
-    cout << end_time - start_time << endl;
-    printf("%g %g\n\n", result[0][0], result[n - 1][n - 1]);
-    //
+    ////Распараллеленное умножение матриц Алгоритм 1
+    //cin >> q;
+    //start_time = omp_get_wtime();
+    //parallelMultiplyAlg1(firstMatrix, secondMatrix, result, q);
+    //end_time = omp_get_wtime();
+    //cout << end_time - start_time << endl;
+    //printf("%g %g\n\n", result[0][0], result[n - 1][n - 1]);
+    ////
 
-    //Распараллеленное умножение матриц Алгоритм 2
-    cin >> q;
-    start_time = omp_get_wtime();
-    parallelMultiplyAlg2(firstMatrix, secondMatrix, result, q);
-    end_time = omp_get_wtime();
-    cout << end_time - start_time << endl;
-    printf("%g %g\n\n", result[0][0], result[n - 1][n - 1]);
-    //
+    ////Распараллеленное умножение матриц Алгоритм 2
+    //cin >> q;
+    //start_time = omp_get_wtime();
+    //parallelMultiplyAlg2(firstMatrix, secondMatrix, result, q);
+    //end_time = omp_get_wtime();
+    //cout << end_time - start_time << endl;
+    //printf("%g %g\n\n", result[0][0], result[n - 1][n - 1]);
+    ////
 
     //Распараллеленное умножение матриц Алгоритм 3
-    cin >> q;
+    //cin >> q;
     start_time = omp_get_wtime();
     parallelMultiplyAlg3(firstMatrix, secondMatrix, result, q);
     end_time = omp_get_wtime();
@@ -144,24 +158,9 @@ int main() {
     printf("%g %g\n\n", result[0][0], result[n - 1][n - 1]);
     //
 
-    //Вычисление евклидовой нормы
-    float C = 0;
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++)
-        {
-            C += result[i][j] * result[i][j];
-        }
-    }
+    //Евклидова норма
+    printf("%g", norm(result));
     //
-    // 
-    //for (int i = 0; i < n; i++)
-    //{
-    //    for (int j = 0; j < n; j++)
-    //    {
-    //        cout << result[i][j] << " ";
-    //    }
-    //    cout << endl << endl;
-    //}
 
     for (int i = 0; i < n; ++i) {
         delete[] firstMatrix[i];
